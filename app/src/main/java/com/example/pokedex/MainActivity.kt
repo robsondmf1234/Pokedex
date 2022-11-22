@@ -1,63 +1,39 @@
 package com.example.pokedex
 
+
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pokedex.adapter.PokemonAdapter
-import com.example.pokedex.databinding.ActivityMainBinding
 import com.example.pokedex.domain.Pokemon
-import com.example.pokedex.domain.PokemonType
+import com.example.pokedex.viewmodel.PokemonViewModel
+import com.example.pokedex.viewmodel.PokemonViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private val recyclerView by lazy {
+        findViewById<RecyclerView>(R.id.rvPokemons)
+    }
 
-    private var pokemonList = mutableListOf<Pokemon>()
+    private val viewModel by lazy {
+        ViewModelProvider(this, PokemonViewModelFactory())
+            .get(PokemonViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        initializeListPokemon()
-        setupRecycler(binding.recycler, pokemonList)
+        setContentView(R.layout.activity_main)
 
-        setContentView(view)
+        viewModel.pokemons.observe(this, Observer {
+            loadRecyclerView(it)
+        })
     }
 
-    private fun setupRecycler(recyclerView: RecyclerView, listPokemon: MutableList<Pokemon>) {
-
-        //RecyclerView
-        //Ordenando alfabeticamente
-        recyclerView.adapter = PokemonAdapter(listPokemon)
+    private fun loadRecyclerView(pokemons: List<Pokemon?>) {
         recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = PokemonAdapter(pokemons)
     }
-
-    private fun initializeListPokemon() {
-        pokemonList = mutableListOf(
-            Pokemon(
-                imageUrl = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/094.png",
-                number = 1,
-                name = "Bulbasaur",
-                types = listOf(PokemonType(name = "Plant"), PokemonType("Green"))
-            ), Pokemon(
-                imageUrl = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/094.png",
-                number = 2,
-                name = "Yvisaur",
-                types = listOf(PokemonType(name = "Plant"), PokemonType("Green"))
-            ), Pokemon(
-                imageUrl = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/094.png",
-                number = 3,
-                name = "Bulbasaur",
-                types = listOf(PokemonType(name = "Plant"), PokemonType("Green"))
-            ), Pokemon(
-                imageUrl = "https://assets.pokemon.com/assets/cms2/img/pokedex/full/094.png",
-                number = 4,
-                name = "Yvisaur",
-                types = listOf(PokemonType(name = "Plant"), PokemonType("Green"))
-            )
-        )
-    }
-
-
 }
